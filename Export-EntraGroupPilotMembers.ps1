@@ -40,7 +40,7 @@ function Export-EntraGroupPilotMembers {
     try {
         $uri = "https://graph.microsoft.com/$graphApiVersion/groups?`$filter=DisplayName eq '$SourceEntraGroupName'"
         $group = (Invoke-MgGraphRequest -uri $uri -Method GET).value
-        Write-Host "Obtaining Group: $sourceEntraGroupName"
+        Write-Output "Obtaining Group: $sourceEntraGroupName"
     }
     catch {
         Write-Error "An error occurred : $_"
@@ -60,10 +60,10 @@ function Export-EntraGroupPilotMembers {
         } while ($uri)
         $groupmembers = $resultCheck.value
 
-        Write-Host "Obtaining '$($group.DisplayName)' with $($groupmembers.count) members." -ForegroundColor Cyan
+        Write-Output "Obtaining '$($group.DisplayName)' with $($groupmembers.count) members."
     }
     catch {
-        Write-Host "An error occurred : $_"
+        Write-Error "An error occurred : $_"
     }
     #endregion
 
@@ -73,7 +73,7 @@ function Export-EntraGroupPilotMembers {
     $NumberofMembers = [int]($($groupMembers).Count * $Decimal)
     $NumberofMembers = [Math]::Ceiling($NumberofMembers)
 
-    Write-Host "Randomizing group and gathering $NumberofMembers workstations." -ForegroundColor Cyan
+    Write-Output "Randomizing group and gathering $NumberofMembers workstations."
     $GroupMembers = $GroupMembers | Sort-Object { Get-Random }
     $GroupMembers = $GroupMembers | Select-Object -First $NumberofMembers
 
@@ -96,10 +96,10 @@ function Export-EntraGroupPilotMembers {
 
     # Test if output file was created
     if (Test-Path $outputfilepath) {
-        Write-g46log -Message "Output file = $outputfilepath."
+        Write-Output "Output file = $outputfilepath."
     }
     else {
-        Write-g46log -Message "No output file created." -Level Warning
+        Write-Warning "No output file created."
     }
     #endregion
 }
