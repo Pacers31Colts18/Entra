@@ -40,16 +40,26 @@ function Export-EntraGroupPilotMembers {
     try {
         $uri = "https://graph.microsoft.com/$graphApiVersion/groups?`$filter=DisplayName eq '$SourceEntraGroupName'"
         $group = (Invoke-MgGraphRequest -uri $uri -Method GET).value
+        Write-Host "Obtaining Group: $sourceEntraGroupName"
     }
     catch {
         Write-Error "An error occurred : $_"
     }
     #end region
 
-    #region Obtain Group Members     
+    #region Obtain Group Members  
+    $resultCheck = @()   
     try {
         $uri = "https://graph.microsoft.com/$graphApiVersion/groups/$($group.Id)/members"
-        $groupMembers = (Invoke-MgGraphRequest -uri $uri -Method GET).value
+        #pagination
+        do {
+            $groupmembers = (Invoke-MgGraphRequest -Uri $uri -Method GET)
+            $resultCheck += $groupmembers
+        
+            $uri = $groupmembers.'@odata.nextLink'
+        } while ($uri)
+        $groupmembers = $resultCheck.value
+
         Write-Host "Obtaining '$($group.DisplayName)' with $($groupmembers.count) members." -ForegroundColor Cyan
     }
     catch {
